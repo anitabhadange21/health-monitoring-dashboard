@@ -63,3 +63,45 @@ function updateTable() {
 // Run every 3 seconds
 setInterval(updateTable, 3000);
 updateTable();
+// Chart.js - Heart Rate Monitoring
+const ctx = document.getElementById('overallChart').getContext('2d');
+
+let heartRateData = {
+  labels: [],
+  datasets: [{
+    label: 'Average Heart Rate',
+    data: [],
+    borderColor: '#e63946',
+    fill: false,
+    tension: 0.4
+  }]
+};
+
+const overallChart = new Chart(ctx, {
+  type: 'line',
+  data: heartRateData,
+  options: {
+    responsive: true,
+    scales: {
+      y: {
+        min: 50,
+        max: 120
+      }
+    }
+  }
+});
+
+// Update chart in real-time
+setInterval(() => {
+  const avgHR = Math.floor(70 + Math.random() * 30);
+  const time = new Date().toLocaleTimeString();
+
+  if (heartRateData.labels.length > 6) {
+    heartRateData.labels.shift();
+    heartRateData.datasets[0].data.shift();
+  }
+
+  heartRateData.labels.push(time);
+  heartRateData.datasets[0].data.push(avgHR);
+  overallChart.update();
+}, 3000);
