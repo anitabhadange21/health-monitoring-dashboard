@@ -1,34 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Elderly Health Monitoring Dashboard</title>
-</head>
-<body>
-  <h1>Health Monitoring Dashboard (Age 65+)</h1>
+fetch("health_data.csv")
+  .then(response => response.text())
+  .then(data => {
+    const rows = data.split("\n").slice(1);
+    const table = document.getElementById("healthTable");
 
-  <table border="1" cellpadding="10">
-    <tr>
-      <th>Name</th>
-      <th>Age</th>
-      <th>Heart Rate</th>
-      <th>Blood Pressure</th>
-      <th>Oxygen Level</th>
-    </tr>
-    <tr>
-      <td>Ramesh</td>
-      <td>70</td>
-      <td>72 bpm</td>
-      <td>120/80</td>
-      <td>98%</td>
-    </tr>
-    <tr>
-      <td>Sita</td>
-      <td>68</td>
-      <td>75 bpm</td>
-      <td>130/85</td>
-      <td>96%</td>
-    </tr>
-  </table>
-</body>
-</html>
-  
+    let heartRates = [];
+
+    rows.forEach(row => {
+      const cols = row.split(",");
+      if (cols.length < 7) return;
+
+      const name = cols[0];
+      const age = cols[1];
+      const heart = parseInt(cols[2]);
+      const sys = cols[3];
+      const dia = cols[4];
+      const oxygen = cols[5];
+      const sugar = cols[6];
+
+      heartRates.push(heart);
+
+      let risk = "Low";
+      if (oxygen < 94 || sugar > 180 || heart > 90) {
+        risk = "High";
+      } else if (sugar > 140 || heart > 80) {
+        risk = "Medium";
+      }
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${name}</td>
+        <td>${age}</td>
+        <td>${heart}</td>
+        <td>${sys}/${dia}</td>
+        <td>${oxygen}%</td>
+        <td>${sugar}</td>
+        <td>${risk}</td>
+      `;
+      table.appendChild(tr);
+    });
+
+    new Chart(document.getElementById("overallChart"), {
+      type: "bar",
+      data: {
+        labels: ["Heart Rate"],
+        datasets: [{
+          label: "Average Heart Rate",
+          data: [heartRates.reduce((a,b)=>a+b)/heartRates.length]
+        }]
+      }
+    });
+  });
